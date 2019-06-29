@@ -7,7 +7,7 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 
-MAX_PAGES = 40 # Max. number of pages is 41
+MAX_PAGES = 40  # Max. number of pages is 41
 SAVE_DIR = 'fox_backgrounds'
 BASE_URL = "http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/page/%s/"
 # use idex number to select desired resolution or device [0-10]
@@ -68,5 +68,9 @@ def get_backgrounds():
         get_images_from_page(BASE_URL % (x + 1))
 
 
-if __name__ == '__main__':
+def main():
     get_backgrounds()
+
+
+if __name__ == '__main__':
+    main()
