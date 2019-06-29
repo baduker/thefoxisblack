@@ -7,9 +7,10 @@ import requests
 from bs4 import BeautifulSoup as bs
 
 
-MAX_PAGES = 1
+MAX_PAGES = 1 # Max. number of pages is 41
 SAVE_DIR = 'fox_backgrounds'
 BASE_URL = "http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/page/%s/"
+# use idex number to select desired resolution or device
 RESOLUTIONS = [
             "1280x800", "1440x900", "1680x1050", "1920x1200", "2560x1440",
             "iphone", "iphone-5", "iphone6", "iphone-6-plus", "iphone6plus",
@@ -36,16 +37,20 @@ def fetchurl(url):
     return requests.get(url).text
 
 
+def clip_url(href):
+    return href[href.rfind('/'):]
+
+
 def get_images_from_page(url):
     html = fetchurl(url)
     soup = bs(html, "html.parser")
     for link in soup.find_all("a", class_="btn_download"):
         href = link["href"]
-        for res in RESOLUTIONS:
+        for res in RESOLUTIONS[:1]:
             if res in href:
-                print("Downloading: {}".format(href))
+                print("Downloading: {}".format(clip_url(href)))
                 r = requests.get(href)
-                with open("fox_backgrounds%s" % href[href.rfind('/'):], 'wb') as f:
+                with open("fox_backgrounds{}".format(clip_url(href)), 'wb') as f:
                         f.write(r.content)
 
 
