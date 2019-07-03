@@ -10,7 +10,7 @@ from bs4 import BeautifulSoup as bs
 MAX_PAGES = 40  # Max. number of pages is 41
 SAVE_DIR = 'fox_backgrounds'
 BASE_URL = "http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/page/%s/"
-# use idex number to select desired resolution or device [0-10]
+# use index number to select desired resolution or device [0-10]
 RESOLUTIONS = [
             "1280x800", "1440x900", "1680x1050", "1920x1200", "2560x1440",
             "iphone", "iphone-5", "iphone6", "iphone-6-plus", "iphone6plus",
@@ -50,8 +50,8 @@ def get_images_from_page(url):
         for res in RESOLUTIONS[:5]:
             """
             If you want to download just one size, remove the for loop and
-            in the if statement wirte;
-            if "-DESIREDxSIZE" eg. if -"1440x900" in href:
+            in the if statement write;
+            if "-DESIREDxSIZE" e.g. if -"1440x900" in href:
             """
             if res in href:
                 print("Downloading: {}".format(clip_url(href)))
