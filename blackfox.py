@@ -1,21 +1,13 @@
-#!/usr/bin/python
+#!/usr/bin/python3
 
 import os
 import requests
 
 
 from bs4 import BeautifulSoup as bs
+from pathlib import Path
+from shutil import copyfileobj
 
-
-MAX_PAGES = 40  # Max. number of pages is 41
-SAVE_DIR = 'fox_backgrounds'
-BASE_URL = "http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/page/%s/"
-# use index number to select desired resolution or device [0-10]
-RESOLUTIONS = [
-            "1280x800", "1440x900", "1680x1050", "1920x1200", "2560x1440",
-            "iphone", "iphone-5", "iphone6", "iphone-6-plus", "iphone6plus",
-            "ipad",
-            ]
 
 LOGO = """
   __            _       _     _            _    
@@ -29,43 +21,58 @@ LOGO = """
 """
 
 
+MAX_PAGES = 1  # Max. number of pages is 41
+SAVE_DIRECTORY = Path('fox_backgrounds')
+BASE_URL = 'http://www.thefoxisblack.com/category/the-desktop-wallpaper-project/page'
+RESOLUTIONS = {
+    '1280x800', '1440x900', '1680x1050', '1920x1200', '2560x1440',
+    'iphone', 'iphone-5', 'iphone6', 'iphone-6-plus', 'iphone6plus',
+    'ipad'
+    }
+
+
 def show_logo():
     print(LOGO)
 
 
-def fetchurl(url):
+def fetch_url(url):
     return requests.get(url).text
 
 
-def clip_url(href):
-    return href[href.rfind('/'):]
+def clip_part(href):
+    return href.rpartition('/')[-1]
+
+
+def save_image(href):
+    part = clip_part(href)
+    print(f'Downloading: {part}')
+    fn = SAVE_DIRECTORY / part
+    with requests.get(href, stream=True) as response, \
+        open(fn, 'wb') as output:
+        copyfileobj(response.raw, output)
 
 
 def get_images_from_page(url):
-    html = fetchurl(url)
-    soup = bs(html, "html.parser")
-    for link in soup.find_all("a", class_="btn_download"):
-        href = link["href"]
-        # Grabs all images from 1280x800 - 2560x1440
-        for res in RESOLUTIONS[:5]:
-            """
-            If you want to download just one size, remove the for loop and
-            in the if statement write;
-            if "-DESIREDxSIZE" e.g. if -"1440x900" in href:
-            """
-            if res in href:
-                print("Downloading: {}".format(clip_url(href)))
-                r = requests.get(href)
-                with open("fox_backgrounds{}".format(clip_url(href)), 'wb') as f:
-                        f.write(r.content)
+    html = fetch_url(url)
+    soup = bs(html, 'html.parser')
+    for link in soup.find_all('a', class_='btn_download'):
+        href = link['href']
+        if any(href.endswith(f'-{res}.jpg') for res in RESOLUTIONS):
+            save_image(href)
+        else:
+            print(f'Unknown resolution {href}')
+
+
+def make_dir():
+    os.makedirs(SAVE_DIRECTORY, exist_ok=True)
 
 
 def get_backgrounds():
     show_logo()
-    if not os.path.exists(SAVE_DIR):
-        os.makedirs(SAVE_DIR)
-    for x in range(0, MAX_PAGES):
-        get_images_from_page(BASE_URL % (x + 1))
+    make_dir()
+    for page in range(1, MAX_PAGES+1):
+        print(f'Fetching page {page}...')
+        get_images_from_page(f'{BASE_URL}{page}')
 
 
 def main():
